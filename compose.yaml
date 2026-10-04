@@ -1,0 +1,52 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-lipepool}
+      MYSQL_USER: ${DB_USERNAME:-lipepool_local}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-lipepool_local_only}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-lipepool_root_local_only}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  app:
+    build: .
+    working_dir: /app
+    volumes:
+      - .:/app
+      - composer-vendor:/app/vendor
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_TIMEZONE: ${APP_TIMEZONE:-America/Sao_Paulo}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-lipepool}
+      DB_USERNAME: ${DB_USERNAME:-lipepool_local}
+      DB_PASSWORD: ${DB_PASSWORD:-lipepool_local_only}
+      DB_MIGRATOR_USERNAME: ${DB_USERNAME:-lipepool_local}
+      DB_MIGRATOR_PASSWORD: ${DB_PASSWORD:-lipepool_local_only}
+      DB_CHARSET: utf8mb4
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        composer install --no-interaction --prefer-dist
+        php bin/migrate.php
+        exec php -S 0.0.0.0:8080 -t public public/router.php
+
+volumes:
+  mysql-data:
+  composer-vendor:

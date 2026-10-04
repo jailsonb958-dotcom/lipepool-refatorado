@@ -4,7 +4,21 @@ Nova base do sistema LipePool, reestruturada em PHP orientado a objetos e MySQL.
 
 > Esta é uma refatoração inicial baseada na leitura estática do projeto de 2018. O ZIP original não incluía schema/dump do MySQL; por isso, horários e algumas regras foram inferidos do código, e ainda precisam ser confirmados antes de migrar dados ou colocar em produção.
 
-## Requisitos
+## Jeito mais simples no Windows (Docker Desktop)
+
+Com Docker, não é preciso instalar PHP, Composer nem MySQL separadamente. O modo abaixo é **somente para desenvolvimento local**.
+
+1. Instale e abra o [Docker Desktop](https://www.docker.com/products/docker-desktop/). Espere ele indicar que está em execução.
+2. Baixe este repositório privado com GitHub Desktop: **File → Clone repository → URL**, usando `https://github.com/jailsonb958-dotcom/lipepool-refatorado`.
+3. Na pasta baixada, dê dois cliques em `iniciar.bat`. Na primeira vez, ele cria a configuração local, baixa dependências, prepara um MySQL isolado, aplica as migrations e inicia o site. Isso pode levar alguns minutos; deixe a janela aberta.
+4. Dê dois cliques em `criar-admin.bat` e responda às perguntas para criar sua conta de administrador.
+5. Abra [http://localhost:8080](http://localhost:8080) no navegador.
+
+Para rodar os testes, mantenha o site iniciado e dê dois cliques em `testes.bat`. Para parar os contêineres, use `parar.bat`; os dados locais do banco são preservados. Os dados só são apagados se você executar `docker compose down -v` no terminal dentro da pasta do projeto — **não use esse comando se quiser preservar seus dados locais**.
+
+O atalho cria `.env` automaticamente a partir de `docker.env.example`. Esse arquivo e as senhas de demonstração servem apenas para o ambiente local isolado. Não reutilize essas senhas fora do Docker e não use essa configuração em produção.
+
+## Requisitos do modo manual (sem Docker)
 
 - PHP 8.2+ com `pdo_mysql`, `mbstring`, `openssl` e `session`.
 - MySQL 8.0.16+ (InnoDB, `utf8mb4`).
